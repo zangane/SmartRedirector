@@ -1,14 +1,11 @@
 <?php
+require __DIR__ . '/../vendor/autoload.php';
 
-require "../vendor/autoload.php";
+use Zangane\SmartRedirector\Redirector;
 
-use SmartRedirector\SmartRedirector;
-
-(new SmartRedirector("https://example.com"))
-    ->statusCode(301)
-    ->expireAt("2025-12-31 23:59:59")
-    ->allowIP("1.2.3.4")
-    ->blockIP("5.6.7.8")
-    ->allowUserAgent("Chrome")
-    ->setLogFile(__DIR__ . "/../logs/redirect.log")
-    ->execute();
+try {
+    $redirector = new Redirector(__DIR__ . '/../redirect-rules.json');
+    $redirector->handle();
+} catch (Exception $e) {
+    echo "Error: " . $e->getMessage();
+}
