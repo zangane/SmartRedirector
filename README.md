@@ -49,8 +49,9 @@ $redirector->handle();
 ```
 - src/
   - Redirector.php
+- examples/
+  - basic.php
 - redirect-rules.json
-- index.php
 - logs/
   - access.log
 - LICENSE
