@@ -15,7 +15,7 @@ SmartRedirector is a powerful and flexible redirection handler for PHP applicati
 ## 📦 Installation
 
 ```
-composer require zangane/SmartRedirector
+composer require zangane/smart-redirector
 ```
 
 ## 🧠 Usage
