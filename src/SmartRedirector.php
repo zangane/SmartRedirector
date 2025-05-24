@@ -1,107 +1,62 @@
 <?php
 
-namespace SmartRedirector;
+namespace Zangane\SmartRedirector;
 
-class SmartRedirector
+class Redirector
 {
-    protected $url;
-    protected $statusCode = 302;
-    protected $expireAt;
-    protected $allowedIPs = [];
-    protected $blockedIPs = [];
-    protected $allowedUserAgents = [];
-    protected $logPath;
+    private $rules = [];
 
-    public function __construct($url)
+    public function __construct($rulesFile)
     {
-        $this->url = $url;
+        if (!file_exists($rulesFile)) {
+            throw new \Exception("Redirect rules file not found.");
+        }
+
+        $json = file_get_contents($rulesFile);
+        $this->rules = json_decode($json, true);
+
+        if (!is_array($this->rules)) {
+            throw new \Exception("Invalid JSON in redirect rules file.");
+        }
     }
 
-    public function statusCode(int $code)
+    public function handle()
     {
-        $this->statusCode = $code;
-        return $this;
-    }
-
-    public function expireAt($datetime)
-    {
-        $this->expireAt = strtotime($datetime);
-        return $this;
-    }
-
-    public function allowIP($ip)
-    {
-        $this->allowedIPs[] = $ip;
-        return $this;
-    }
-
-    public function blockIP($ip)
-    {
-        $this->blockedIPs[] = $ip;
-        return $this;
-    }
-
-    public function allowUserAgent($agent)
-    {
-        $this->allowedUserAgents[] = $agent;
-        return $this;
-    }
-
-    public function setLogFile($path)
-    {
-        $this->logPath = $path;
-        return $this;
-    }
-
-    public function execute()
-    {
-        $clientIP = $_SERVER["REMOTE_ADDR"] ?? "";
+        $requestUri = trim($_SERVER["REQUEST_URI"], "/");
+        $ip = $_SERVER["REMOTE_ADDR"] ?? "";
         $userAgent = $_SERVER["HTTP_USER_AGENT"] ?? "";
 
-        // Check expiration
-        if ($this->expireAt && time() > $this->expireAt) {
-            $this->log("Redirect blocked: expired");
-            return;
-        }
+        foreach ($this->rules as $rule) {
+            if ($rule["path"] !== $requestUri) {
+                continue;
+            }
 
-        // Check blocked IPs
-        if (in_array($clientIP, $this->blockedIPs)) {
-            $this->log("Redirect blocked: IP $clientIP is blocked");
-            return;
-        }
+            // Expiration check
+            if (isset($rule["expire_at"]) && strtotime($rule["expire_at"]) < time()) {
+                continue;
+            }
 
-        // Check allowed IPs
-        if (!empty($this->allowedIPs) && !in_array($clientIP, $this->allowedIPs)) {
-            $this->log("Redirect blocked: IP $clientIP is not allowed");
-            return;
-        }
+            // IP check
+            if (isset($rule["ip_allow"]) && !in_array($ip, $rule["ip_allow"])) {
+                continue;
+            }
 
-        // Check user agent
-        if (!empty($this->allowedUserAgents)) {
-            $matched = false;
-            foreach ($this->allowedUserAgents as $ua) {
-                if (stripos($userAgent, $ua) !== false) {
-                    $matched = true;
-                    break;
+            // User agent block
+            if (isset($rule["user_agent_block"])) {
+                foreach ($rule["user_agent_block"] as $blocked) {
+                    if (stripos($userAgent, $blocked) !== false) {
+                        continue 2;
+                    }
                 }
             }
-            if (!$matched) {
-                $this->log("Redirect blocked: UA $userAgent not allowed");
-                return;
-            }
+
+            // Logging
+            $this->logRedirect($rule["path"], $rule["target"], $ip, $userAgent);
+
+            // Perform redirect
+            $status = $rule["status"] ?? 302;
+            header("Location: " . $rule["target"], true, $status);
+            exit;
         }
 
-        // Do redirect
-        $this->log("Redirected to {$this->url} with status {$this->statusCode}");
-        header("Location: {$this->url}", true, $this->statusCode);
-        exit;
-    }
-
-    protected function log($message)
-    {
-        if ($this->logPath) {
-            $entry = "[" . date("Y-m-d H:i:s") . "] " . $message . "\n";
-            file_put_contents($this->logPath, $entry, FILE_APPEND);
-        }
-    }
-}
+        // Optional: You can add a fallback 404 or message her
