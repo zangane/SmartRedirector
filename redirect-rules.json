@@ -1,0 +1,16 @@
+[
+  {
+    "path": "promo",
+    "target": "https://example.com/promo",
+    "status": 302,
+    "expire_at": "2025-12-31 23:59:59",
+    "ip_allow": ["127.0.0.1"],
+    "user_agent_block": ["curl", "bot"]
+  },
+  {
+    "path": "expired",
+    "target": "https://example.com/expired",
+    "status": 301,
+    "expire_at": "2022-01-01 00:00:00"
+  }
+]
