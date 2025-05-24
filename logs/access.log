@@ -1,0 +1,4 @@
+[2025-05-24 14:52:30] Redirected to https://example.com/promo (302)
+[2025-05-24 15:03:45] Blocked: user-agent matched "curl"
+[2025-05-24 15:10:12] Blocked: IP 1.1.1.1 not in allowed list
+[2025-05-24 15:25:50] Expired redirect skipped for path "promo"
