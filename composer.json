@@ -1,19 +1,19 @@
 {
   "name": "zangane/SmartRedirector",
-  "description": "A smart PHP redirector with support for conditions, expiration, status codes and logging.",
+  "description": "A powerful and flexible PHP redirect handler with time, IP, and user-agent conditions.",
   "type": "library",
   "license": "MIT",
-  "autoload": {
-    "psr-4": {
-      "SmartRedirector\\": "src/"
-    }
-  },
   "authors": [
     {
       "name": "Mohammad Zangeneh",
       "email": "admin@zangane.net"
     }
   ],
+  "autoload": {
+    "psr-4": {
+      "Zangane\\SmartRedirector\\": "src/"
+    }
+  },
   "require": {
     "php": ">=7.2"
   }
