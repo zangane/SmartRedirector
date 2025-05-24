@@ -1,5 +1,5 @@
 {
-  "name": "zangane/SmartRedirector",
+  "name": "zangane/smart-redirector",
   "description": "A powerful and flexible PHP redirect handler with time, IP, and user-agent conditions.",
   "type": "library",
   "license": "MIT",
